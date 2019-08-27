@@ -9,7 +9,7 @@ import numpy as np
 import tensorflow as tf
 from sklearn.cluster import MiniBatchKMeans
 
-from architecture import img_alexnet_layers
+from architecture import img_resnet50_keras as img_alexnet_layers
 from distance.tfversion import distance
 from evaluation import MAPs_CQ
 
@@ -72,7 +72,7 @@ class DTQ(object):
         self.sess = tf.Session(config=config_proto)
 
         # Create variables and placeholders
-        self.img = tf.placeholder(tf.float32, [None, 256, 256, 3])
+        self.img = tf.placeholder(tf.float32, [None, 224, 224, 3])
         self.model_weights = config.model_weights
         self.img_last_layer, self.deep_param_img, self.train_layers, self.train_last_layer = self.load_model()
 

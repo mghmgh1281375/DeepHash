@@ -18,6 +18,7 @@
 import os
 import cv2
 import numpy as np
+from keras.applications.resnet50 import preprocess_input
 
 
 # Process images of this size. Note that this differs from the original nus-wide
@@ -45,7 +46,7 @@ class Dataset(object):
 
     def get_img(self, i):
         path = os.path.join(self.data_root, self.lines[i].strip().split()[0])
-        return cv2.resize(cv2.imread(path), (256, 256))
+        return preprocess_input(cv2.resize(cv2.imread(path), (224, 224))[:, :, ::-1])
 
     def get_label(self, i):
         return [int(j) for j in self.lines[i].strip().split()[1:]]

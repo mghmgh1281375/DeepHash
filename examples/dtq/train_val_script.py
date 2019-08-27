@@ -1,6 +1,8 @@
 import numpy as np
 import scipy.io as sio
 import warnings
+import sys
+sys.path.append('/home/mohammad/Projects/DeepHash/DeepHash/')
 import data_provider.image as dataset
 import model.dtq as model
 from pprint import pprint
@@ -40,7 +42,7 @@ parser.set_defaults(with_tanh=True)
 parser.add_argument('--img-model', default='alexnet', type=str)
 parser.add_argument('--model-weights', type=str,
                     default='../../DeepHash/architecture/pretrained_model/reference_pretrain.npy')
-parser.add_argument('--finetune-all', default=True, type=bool)
+parser.add_argument('--finetune-all', default=False, type=bool)
 parser.add_argument('--max-iter-update-b', default=3, type=int)
 parser.add_argument('--max-iter-update-Cb', default=1, type=int)
 parser.add_argument('--code-batch-size', default=500, type=int)
