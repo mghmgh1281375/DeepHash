@@ -2,13 +2,47 @@ import os
 import tensorflow as tf
 import numpy as np
 
+import keras
+from keras.applications.resnet50 import ResNet50
+
+def img_resnet50_keras(img, batch_size, output_dim, stage, model_weights, with_tanh=True, val_batch_size=32):
+    deep_param_img = {}
+    train_layers = []
+    train_last_layer = []
+    # input_shape=(None, None, 3), 
+    model = ResNet50(weights='imagenet', include_top=False, input_tensor=img)
+    input_tensor = model.input
+    output_tensor = keras.layers.Dense(64)(model.output)
+    model = keras.models.Model(input_tensor, output_tensor)
+    
+    before_last_layer_tensors = []
+    for layer in model.layers[1:-1]:
+        try:
+            if layer.bias is not None:
+                before_last_layer_tensors.append([layer.kernel, layer.bias])
+            else: print('None bias.')
+        except Exception as e:
+            print(e)
+
+    for layer in model.layers:
+        try:
+            if layer.bias is not None:
+                deep_param_img[layer.name]= [layer.kernel, layer.bias]
+        except Exception as e:
+            print(e)
+
+    from pprint import pprint
+    pprint(before_last_layer_tensors)
+
+    return model.output, deep_param_img, before_last_layer_tensors, [model.layers[-1].kernel, model.layers[-1].bias]
 
 def img_alexnet_layers(img, batch_size, output_dim, stage, model_weights, with_tanh=True, val_batch_size=32):
     deep_param_img = {}
     train_layers = []
     train_last_layer = []
     print("loading img model from %s" % model_weights)
-    net_data = dict(np.load(model_weights, encoding='bytes').item())
+    net_data = dict(np.load(model_weights, encoding='bytes',
+                            allow_pickle=True).item())
     print(list(net_data.keys()))
 
     # swap(2,1,0), bgr -> rgb
