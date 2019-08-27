@@ -1,0 +1,1 @@
+python train_val_script.py --dataset "dk-hh" --gpus "0,1" --data-dir $PWD/../../data --epochs 1
