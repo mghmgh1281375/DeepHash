@@ -12,7 +12,7 @@ def img_resnet50_keras(img, batch_size, output_dim, stage, model_weights, with_t
     # input_shape=(None, None, 3), 
     model = ResNet50(weights='imagenet', include_top=False, input_tensor=img)
     input_tensor = model.input
-    output_tensor = keras.layers.Dense(64)(model.output)
+    output_tensor = keras.layers.GlobalAveragePooling2D(64)(model.output)
     model = keras.models.Model(input_tensor, output_tensor)
     
     before_last_layer_tensors = []
