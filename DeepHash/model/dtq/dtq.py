@@ -160,9 +160,9 @@ class DTQ(object):
             basic_loss = tf.maximum(pos_dist - neg_dist + margin, 0.0)
             loss = tf.reduce_mean(basic_loss, 0)
 
-            tf.summary.histogram('pos_dist', pos_dist)
-            tf.summary.histogram('neg_dist', neg_dist)
-            tf.summary.histogram('pos_dist - neg_dist', pos_dist - neg_dist)
+            # tf.summary.histogram('pos_dist', pos_dist)
+            # tf.summary.histogram('neg_dist', neg_dist)
+            # tf.summary.histogram('pos_dist - neg_dist', pos_dist - neg_dist)
 
         return loss
 
