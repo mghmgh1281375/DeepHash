@@ -350,7 +350,7 @@ class DTQ(object):
                                self.b_img: codes})
                 img_dataset.feed_batch_triplet_output(triplet_batch_size, output)
                 if train_iter < 100 or i % 100 == 0:
-                    print('%s Epoch: [%d/%d][%d/%d]\tTime %.3fs\tLoss %.3f'
+                    print('%s Epoch: [%d/%d][%d/%d]\tTime %.3fs\tLoss %.9f'
                           % (datetime.now(), epoch, self.max_epoch, i+1, epoch_iter, time.time() - start_time, loss))
                 train_writer.add_summary(summary, train_iter)
                 train_iter += 1

@@ -13,14 +13,20 @@ def img_resnet50_keras(img, batch_size, output_dim, stage, model_weights, with_t
     model = ResNet50(weights='imagenet', include_top=False, input_tensor=img, input_shape=(224, 224, 3))
     input_tensor = model.input
     output_tensor = keras.layers.Flatten()(model.output)
-    output_tensor = keras.layers.Dense(64)(output_tensor)
+    output_tensor = keras.layers.Dense(output_dim)(output_tensor)
 
     model = keras.models.Model(input_tensor, output_tensor)
-    
+    print("loading img model from %s" % model_weights)
+    net_data = dict(np.load(model_weights, encoding='bytes',
+                            allow_pickle=True).item())
+
     before_last_layer_tensors = []
     for layer in model.layers[1:-1]:
         try:
             if layer.bias is not None:
+                layer.kernel.assign(net_data[layer.name][0])
+                layer.bias.assign(net_data[layer.name][1])
+
                 before_last_layer_tensors.append([layer.kernel, layer.bias])
             else: print('None bias.')
         except Exception as e:
