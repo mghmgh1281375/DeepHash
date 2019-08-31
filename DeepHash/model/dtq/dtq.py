@@ -13,6 +13,10 @@ from architecture import img_resnet50_keras as img_alexnet_layers
 from distance.tfversion import distance
 from evaluation import MAPs_CQ
 
+import cv2
+from keras.applications.resnet50 import preprocess_input
+from tqdm import tqdm
+
 
 class DTQ(object):
     def __init__(self, config):
@@ -391,6 +395,31 @@ class DTQ(object):
             if i % val_print_freq == 0:
                 print("%s #validation# batch %d/%d" % (datetime.now(), i, batch))
 
+    def my_val_forward(self, images_triplets):
+        """[summary]
+        
+        Arguments:
+            images_triplets {list} -- list of tuples like: (anchor, positive, negative)
+        
+        Keyword Arguments:
+            val_print_freq {int} -- [description] (default: {100})
+        """
+
+        def read_all(anchor_paths, positive_paths, negative_paths):
+            return [preprocess_input(cv2.resize(cv2.imread(path), (224, 224))[:, :, ::-1]) for path in anchor_paths], [preprocess_input(cv2.resize(cv2.imread(path), (224, 224))[:, :, ::-1]) for path in positive_paths], [preprocess_input(cv2.resize(cv2.imread(path), (224, 224))[:, :, ::-1]) for path in negative_paths]
+
+        EVAL = 1
+        n_batch = int(ceil((len(images_triplets)*3) / float(self.val_batch_size)))
+        anchors, positives, negatives = [], [], []
+        for i in tqdm(range(n_batch)):
+            anchor_images, positive_images, negative_images = read_all(*list(zip(*images_triplets[i*self.val_batch_size:(i+1)*self.val_batch_size])))
+            anchors.extend(self.sess.run([self.img_last_layer], feed_dict={self.img: anchor_images, self.stage: EVAL}))
+            positives.extend(self.sess.run([self.img_last_layer], feed_dict={self.img: positive_images, self.stage: EVAL}))
+            negatives.extend(self.sess.run([self.img_last_layer], feed_dict={self.img: negative_images, self.stage: EVAL}))
+
+        return anchors, positives, negatives
+
+
     def validation(self, img_query, img_database, R=100):
         print("%s #validation# start validation" % (datetime.now()))
 
@@ -417,4 +446,3 @@ class DTQ(object):
             'map_AQD_ip':  mAPs.get_mAPs_AQD(img_database, img_query),
             'map_SQD_ip': mAPs.get_mAPs_SQD(img_database, img_query)
         }
-
