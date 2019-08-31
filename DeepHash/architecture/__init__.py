@@ -23,9 +23,12 @@ def img_resnet50_keras(img, batch_size, output_dim, stage, model_weights, with_t
     output_tensor = keras.layers.Dense(output_dim, activation='tanh' if with_tanh else 'linear')(output_tensor)
 
     model = keras.models.Model(input_tensor, output_tensor)
-    print("loading img model from %s" % model_weights)
-    net_data = dict(np.load(model_weights, encoding='bytes',
-                            allow_pickle=True).item())
+
+    net_data = None
+    if 'reference_pretrain' not in model_weights:
+        print("loading img model from %s" % model_weights)
+        net_data = dict(np.load(model_weights, encoding='bytes',
+                                allow_pickle=True).item())
 
     before_last_layer_tensors = []
     for layer in model.layers[1:-1]:
@@ -33,9 +36,10 @@ def img_resnet50_keras(img, batch_size, output_dim, stage, model_weights, with_t
             if layer.bias is not None:
                 before_last_layer_tensors.append([layer.kernel, layer.bias])
 
-                layer.kernel.assign(tf.convert_to_tensor(net_data[layer.name][0], dtype=tf.float32))
-                layer.bias.assign(tf.convert_to_tensor(net_data[layer.name][1], dtype=tf.float32))
-                print('%s weight loaded.'%layer.name)
+                if net_data is not None:
+                    layer.kernel.assign(tf.convert_to_tensor(net_data[layer.name][0], dtype=tf.float32))
+                    layer.bias.assign(tf.convert_to_tensor(net_data[layer.name][1], dtype=tf.float32))
+                    print('%s weight loaded.'%layer.name)
 
             else: pass#print('None bias.')
         except Exception as e:
