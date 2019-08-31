@@ -24,10 +24,11 @@ def img_resnet50_keras(img, batch_size, output_dim, stage, model_weights, with_t
     for layer in model.layers[1:-1]:
         try:
             if layer.bias is not None:
-                layer.kernel.assign(net_data[layer.name][0])
-                layer.bias.assign(net_data[layer.name][1])
-
                 before_last_layer_tensors.append([layer.kernel, layer.bias])
+                
+                layer.kernel.assign(tf.convert_to_tensor(net_data[layer.name][0], dtype=tf.float32))
+                layer.bias.assign(tf.convert_to_tensor(net_data[layer.name][1], dtype=tf.float32))
+
             else: print('None bias.')
         except Exception as e:
             print(e)
