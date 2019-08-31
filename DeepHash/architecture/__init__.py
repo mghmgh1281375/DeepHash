@@ -16,7 +16,7 @@ def img_resnet50_keras(img, batch_size, output_dim, stage, model_weights, with_t
         return tf.stack([tf.random_crop(tf.image.random_flip_left_right(each), [height, width, 3])
                                 for each in tf.unstack(img, batch_size)])
     
-    img = tf.cond(stage==0, train_prep_fn, lambda :img)
+    img = tf.cond(tf.math.equal(stage, 0), train_prep_fn, lambda :img)
     model = ResNet50(weights='imagenet', include_top=False, input_tensor=img, input_shape=(height, width, 3))
     input_tensor = model.input
     output_tensor = keras.layers.Flatten()(model.output)
