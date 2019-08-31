@@ -28,6 +28,7 @@ def img_resnet50_keras(img, batch_size, output_dim, stage, model_weights, with_t
 
                 layer.kernel.assign(tf.convert_to_tensor(net_data[layer.name][0], dtype=tf.float32))
                 layer.bias.assign(tf.convert_to_tensor(net_data[layer.name][1], dtype=tf.float32))
+                print('%s weight loaded.'%layer.name)
 
             else: pass#print('None bias.')
         except Exception as e:
@@ -40,8 +41,8 @@ def img_resnet50_keras(img, batch_size, output_dim, stage, model_weights, with_t
         except Exception as e:
             pass#print(e)
 
-    from pprint import pprint
-    pprint(before_last_layer_tensors)
+    # from pprint import pprint
+    # pprint(before_last_layer_tensors)
 
     return model.output, deep_param_img, before_last_layer_tensors, [model.layers[-1].kernel, model.layers[-1].bias]
 
