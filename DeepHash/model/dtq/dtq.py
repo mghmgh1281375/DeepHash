@@ -409,7 +409,7 @@ class DTQ(object):
             return [preprocess_input(cv2.resize(cv2.imread(path), (224, 224))[:, :, ::-1]) for path in anchor_paths], [preprocess_input(cv2.resize(cv2.imread(path), (224, 224))[:, :, ::-1]) for path in positive_paths], [preprocess_input(cv2.resize(cv2.imread(path), (224, 224))[:, :, ::-1]) for path in negative_paths]
 
         EVAL = 1
-        n_batch = int(ceil((len(images_triplets)*3) / float(self.val_batch_size)))
+        n_batch = int(ceil((len(images_triplets)) / float(self.val_batch_size)))
         anchors, positives, negatives = [], [], []
         for i in tqdm(range(n_batch)):
             anchor_images, positive_images, negative_images = read_all(*list(zip(*images_triplets[i*self.val_batch_size:(i+1)*self.val_batch_size])))

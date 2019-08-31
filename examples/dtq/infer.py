@@ -2,7 +2,7 @@ import numpy as np
 import scipy.io as sio
 import warnings
 import sys
-sys.path.append('/home/mohammad/Projects/DeepHash/DeepHash/')
+sys.path.append('/home/sobhe/sam/DeepHash/DeepHash/')
 import data_provider.image as dataset
 import model.dtq as model
 from pprint import pprint
@@ -79,12 +79,18 @@ with open(args.inference_triplets_file, 'r') as file:
     reader = csv.reader(file)
     try:
         while True:
-            images_triplets.extend(next(reader))
+            images_triplets.append([os.path.join(args.data_dir, img) for img in next(reader)])
     except StopIteration as e:
         pass
-    
+
+#pprint(images_triplets)   
 anchors, positives, negatives = model.my_val_forward(images_triplets)
 
+results = {}
+results['anchors'] = anchors
+results['positives'] = positives
+results['negatives'] = negatives
+np.save('infer.npy', results)
 
 
 # query_img, database_img = dataset.import_validation(data_root, args.img_te, args.img_db)
