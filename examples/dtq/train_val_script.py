@@ -29,7 +29,7 @@ parser.add_argument('--gpus', default='0', type=str)
 parser.add_argument('--log-dir', default='tflog', type=str)
 parser.add_argument('--dist-type', default='euclidean2', type=str,
                     choices=['euclidean2', 'cosine', 'inner_product', 'euclidean'])
-parser.add_argument('-b', '--batch-size', default=128, type=int)
+parser.add_argument('-b', '--batch-size', default=27, type=int)
 parser.add_argument('-vb', '--val-batch-size', default=16, type=int)
 parser.add_argument('--decay-step', default=10000, type=int)
 parser.add_argument('--decay-factor', default=0.1, type=int)
