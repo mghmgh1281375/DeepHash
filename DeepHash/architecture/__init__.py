@@ -10,10 +10,17 @@ def img_resnet50_keras(img, batch_size, output_dim, stage, model_weights, with_t
     train_layers = []
     train_last_layer = []
     # input_shape=(None, None, 3), 
-    model = ResNet50(weights='imagenet', include_top=False, input_tensor=img, input_shape=(224, 224, 3))
+    height, width = 224, 224
+
+    def train_prep_fn():
+        return tf.stack([tf.random_crop(tf.image.random_flip_left_right(each), [height, width, 3])
+                                for each in tf.unstack(img, batch_size)])
+    
+    img = tf.cond(stage==0, train_prep_fn, lambda :img)
+    model = ResNet50(weights='imagenet', include_top=False, input_tensor=img, input_shape=(height, width, 3))
     input_tensor = model.input
     output_tensor = keras.layers.Flatten()(model.output)
-    output_tensor = keras.layers.Dense(output_dim)(output_tensor)
+    output_tensor = keras.layers.Dense(output_dim, activation='tanh' if with_tanh else 'linear')(output_tensor)
 
     model = keras.models.Model(input_tensor, output_tensor)
     print("loading img model from %s" % model_weights)
@@ -81,8 +88,7 @@ def img_alexnet_layers(img, batch_size, output_dim, stage, model_weights, with_t
             def distort_fliped(x, y): return distort(
                 tf.image.flip_left_right, x, y)
             distorted = tf.concat([distort_fliped(0, 0), distort_fliped(28, 0),
-                                   distort_fliped(
-                                       0, 28), distort_fliped(28, 28),
+                                   distort_fliped(0, 28), distort_fliped(28, 28),
                                    distort_fliped(14, 14), distort_raw(0, 0),
                                    distort_raw(28, 0), distort_raw(0, 28),
                                    distort_raw(28, 28), distort_raw(14, 14)], 0)
