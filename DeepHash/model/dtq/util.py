@@ -17,6 +17,7 @@ class Dataset(object):
         np.random.shuffle(self._perm)
         return
 
+    from tqdm import tqdm
     def update_triplets(self, margin, n_part=10, dist_type='euclidean2', select_strategy='margin'):
         """
         :param select_strategy: hard, all, margin
@@ -30,7 +31,7 @@ class Dataset(object):
         labels = self._dataset.get_labels()[self._perm[:n_samples]]
         n_samples_per_part = int(math.ceil(n_samples / n_part))
         triplets = []
-        for i in range(n_part):
+        for i in tqdm(range(n_part)):
             start = n_samples_per_part * i
             end = min(n_samples_per_part * (i+1), n_samples)
             dist = distance(embedding[start:end], pair=True, dist_type=dist_type)
