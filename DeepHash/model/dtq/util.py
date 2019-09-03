@@ -1,5 +1,6 @@
 import numpy as np
 import math
+from tqdm import tqdm
 from distance.npversion import distance
 
 class Dataset(object):
@@ -30,7 +31,6 @@ class Dataset(object):
         labels = self._dataset.get_labels()[self._perm[:n_samples]]
         n_samples_per_part = int(math.ceil(n_samples / n_part))
         triplets = []
-        from tqdm import tqdm
         for i in tqdm(range(n_part)):
             start = n_samples_per_part * i
             end = min(n_samples_per_part * (i+1), n_samples)
