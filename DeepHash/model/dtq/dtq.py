@@ -164,9 +164,9 @@ class DTQ(object):
             basic_loss = tf.maximum(pos_dist - neg_dist + margin, 0.0)
             loss = tf.reduce_mean(basic_loss, 0)
 
-            # tf.summary.histogram('pos_dist', pos_dist)
-            # tf.summary.histogram('neg_dist', neg_dist)
-            # tf.summary.histogram('pos_dist - neg_dist', pos_dist - neg_dist)
+            tf.summary.histogram('pos_dist', pos_dist)
+            tf.summary.histogram('neg_dist', neg_dist)
+            tf.summary.histogram('pos_dist - neg_dist', pos_dist - neg_dist)
 
         return loss
 
@@ -441,8 +441,8 @@ class DTQ(object):
         C_tmp = self.sess.run(self.C)
         mAPs = MAPs_CQ(C_tmp, self.subspace_num, self.subcenter_num, R)
         self.save_codes(img_database, img_query, C_tmp)
-        return {
-            'map_feature_ip': mAPs.get_mAPs_by_feature(img_database, img_query),
-            'map_AQD_ip':  mAPs.get_mAPs_AQD(img_database, img_query),
-            'map_SQD_ip': mAPs.get_mAPs_SQD(img_database, img_query)
-        }
+        return {}
+        #     'map_feature_ip': mAPs.get_mAPs_by_feature(img_database, img_query),
+        #     'map_AQD_ip':  mAPs.get_mAPs_AQD(img_database, img_query),
+        #     'map_SQD_ip': mAPs.get_mAPs_SQD(img_database, img_query)
+        # }
