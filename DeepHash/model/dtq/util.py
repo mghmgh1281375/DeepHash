@@ -30,7 +30,8 @@ class Dataset(object):
         labels = self._dataset.get_labels()[self._perm[:n_samples]]
         n_samples_per_part = int(math.ceil(n_samples / n_part))
         triplets = []
-        for i in range(n_part):
+        from tqdm import tqdm
+        for i in tqdm(range(n_part)):
             start = n_samples_per_part * i
             end = min(n_samples_per_part * (i+1), n_samples)
             dist = distance(embedding[start:end], pair=True, dist_type=dist_type)

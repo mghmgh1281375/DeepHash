@@ -305,10 +305,10 @@ class DTQ(object):
         for i in range(self.max_iter_update_Cb):
             self.update_codes_batch(img_dataset, self.code_batch_size)
             self.update_centers(img_dataset)
-
+    from tqdm import tqdm
     def update_embedding_and_triplets(self, img_dataset):
         epoch_iter = int(img_dataset.n_samples / self.batch_size)
-        for i in range(epoch_iter):
+        for i in tqdm(range(epoch_iter)):
             images, labels, codes = img_dataset.next_batch(self.batch_size)
             output = self.sess.run(self.img_last_layer,
                                    feed_dict={self.img: images, self.b_img: codes})
