@@ -6,22 +6,44 @@ import keras
 from keras.applications.resnet50 import ResNet50
 
 def img_resnet50_keras(img, batch_size, output_dim, stage, model_weights, with_tanh=True, val_batch_size=32):
-    deep_param_img = {}
-    train_layers = []
-    train_last_layer = []
-    # input_shape=(None, None, 3), 
-    height, width = 224, 224
+    deep_param_img, train_layers, train_last_layer = {}, [], []
+    EVAL, height, width = 1, 224, 224
 
     def train_prep_fn():
         return tf.stack([tf.random_crop(tf.image.random_flip_left_right(each), [height, width, 3])
-                                for each in tf.unstack(img, batch_size)])
-    
-    img = tf.cond(tf.math.equal(stage, 0), train_prep_fn, lambda :img)
-    model = ResNet50(weights='imagenet', include_top=False, input_tensor=img, input_shape=(height, width, 3))
+                         for each in tf.unstack(img, batch_size)])
+
+    def val_prep_fn():
+        unstacked = tf.unstack(img, val_batch_size)
+
+        def crop(img, x, y): return tf.image.crop_to_bounding_box(
+            img, x, y, width, height)
+
+        #crop = lambda img, x, y: img
+        def distort(f, x, y): return tf.stack(
+            [crop(f(each), x, y) for each in unstacked])
+
+        def distort_raw(x, y): return distort(lambda x: x, x, y)
+
+        def distort_fliped(x, y): return distort(
+            tf.image.flip_left_right, x, y)
+        distorted = tf.concat([distort_fliped(0, 0), distort_fliped(28, 0),
+                               distort_fliped(
+            0, 28), distort_fliped(28, 28),
+            distort_fliped(14, 14), distort_raw(0, 0),
+            distort_raw(28, 0), distort_raw(0, 28),
+            distort_raw(28, 28), distort_raw(14, 14)], 0)
+        return distorted
+
+    img = tf.cond(tf.math.equal(stage, 0), train_prep_fn, val_prep_fn)
+    model = ResNet50(weights='imagenet', include_top=False,
+                     input_tensor=img, input_shape=(height, width, 3))
     input_tensor = model.input
     output_tensor = keras.layers.Flatten()(model.output)
-    output_tensor = keras.layers.Dense(output_dim, activation='tanh' if with_tanh else 'linear')(output_tensor)
-
+    output_tensor = keras.layers.Dense(
+        output_dim, activation='tanh' if with_tanh else 'linear', name='fc8')(output_tensor)
+    output_tensor = keras.layers.Lambda(lambda fc8_t: tf.where(tf.math.equal(stage, EVAL), tf.reduce_mean(tf.concat(
+        [tf.expand_dims(i, 0) for i in tf.split(fc8_t, 10, 0)], 0), 0), fc8_t))(output_tensor)
     model = keras.models.Model(input_tensor, output_tensor)
 
     net_data = None
@@ -37,23 +59,29 @@ def img_resnet50_keras(img, batch_size, output_dim, stage, model_weights, with_t
                 before_last_layer_tensors.append([layer.kernel, layer.bias])
 
                 if net_data is not None:
-                    layer.kernel.assign(tf.convert_to_tensor(net_data[layer.name][0], dtype=tf.float32))
-                    layer.bias.assign(tf.convert_to_tensor(net_data[layer.name][1], dtype=tf.float32))
-                    print('%s weight loaded.'%layer.name)
+                    layer.kernel.assign(tf.convert_to_tensor(
+                        net_data[layer.name][0], dtype=tf.float32))
+                    layer.bias.assign(tf.convert_to_tensor(
+                        net_data[layer.name][1], dtype=tf.float32))
+                    print('%s weight loaded.' % layer.name)
 
-            else: pass#print('None bias.')
+            else:
+                pass  # print('None bias.')
         except Exception as e:
-            pass#print(e)
+            pass  # print(e)
 
     for layer in model.layers:
         try:
             if layer.bias is not None:
-                deep_param_img[layer.name]= [layer.kernel, layer.bias]
+                deep_param_img[layer.name] = [layer.kernel, layer.bias]
+                if net_data is not None:
+                    layer.kernel.assign(tf.convert_to_tensor(
+                        net_data[layer.name][0], dtype=tf.float32))
+                    layer.bias.assign(tf.convert_to_tensor(
+                        net_data[layer.name][1], dtype=tf.float32))
+                    print('%s weight loaded.' % layer.name)
         except Exception as e:
-            pass#print(e)
-
-    # from pprint import pprint
-    # pprint(before_last_layer_tensors)
+            pass  # print(e)
 
     return model.output, deep_param_img, before_last_layer_tensors, [model.layers[-1].kernel, model.layers[-1].bias]
 

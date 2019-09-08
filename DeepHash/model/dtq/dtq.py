@@ -355,7 +355,7 @@ class DTQ(object):
                 img_dataset.feed_batch_triplet_output(triplet_batch_size, output)
                 if train_iter < 100 or i % 100 == 0:
                     print('%s Epoch: [%d/%d][%d/%d]\tTime %.3fs\tLoss %.9f'
-                          % (datetime.now(), epoch, self.max_epoch, i+1, epoch_iter, time.time() - start_time, loss))
+                          % (datetime.now(), epoch+1, self.max_epoch, i+1, epoch_iter, time.time() - start_time, loss))
                 train_writer.add_summary(summary, train_iter)
                 train_iter += 1
 
@@ -366,20 +366,20 @@ class DTQ(object):
             self.update_embedding_and_triplets(img_dataset)
             # img_dataset.update_triplets(self.triplet_margin, n_part=self.n_part, select_strategy=self.select_strategy)
 
-            val_summary = tf.Summary()
-            val_summary.value.add(tag='num_triplets', simple_value=img_dataset.triplets.shape[0])
+            # val_summary = tf.Summary()
+            # val_summary.value.add(tag='num_triplets', simple_value=img_dataset.triplets.shape[0])
             # validation
-            if (epoch+1) % self.val_freq == 0 or (epoch+1) == self.max_epoch:
-                maps = self.validation(img_query, img_database, R)
-                for key in maps:
-                    print("{}\t{}".format(key, maps[key]))
-                    val_summary.value.add(tag=key, simple_value=maps[key])
-            train_writer.add_summary(val_summary, epoch+1)
-            train_writer.flush()
+            # if (epoch+1) % self.val_freq == 0 or (epoch+1) == self.max_epoch:
+            #     maps = self.validation(img_query, img_database, R)
+            #     for key in maps:
+            #         print("{}\t{}".format(key, maps[key]))
+            #         val_summary.value.add(tag=key, simple_value=maps[key])
+            # train_writer.add_summary(val_summary, epoch+1)
+            # train_writer.flush()
 
-        print("%s #traing# finish training" % datetime.now())
-        self.save_model()
-        print("model saved")
+            print("%s #traing# finish training" % datetime.now())
+            self.save_model()
+            print("model saved")
 
         self.sess.close()
 

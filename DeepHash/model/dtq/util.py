@@ -2,6 +2,8 @@ import numpy as np
 import math
 from tqdm import tqdm
 from distance.npversion import distance
+from tqdm import tqdm
+
 
 class Dataset(object):
     def __init__(self, dataset, output_dim, code_dim):
@@ -25,6 +27,7 @@ class Dataset(object):
         :param margin: triplet margin parameter
         :n_part: number of part to split data
         """
+        print('# Update_triplets()')
         n_samples = self.n_samples
         np.random.shuffle(self._perm)
         embedding = self._output[self._perm[:n_samples]]
