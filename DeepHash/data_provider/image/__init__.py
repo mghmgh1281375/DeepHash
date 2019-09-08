@@ -77,8 +77,8 @@ class Dataset(object):
             if self._load_num == self.n_samples:
                 self._status = 1
                 self._img = np.asarray(self._img)
-                self._label = np.asarray(self._label)
-            return (np.asarray(ret_img), np.asarray(ret_label))
+                self._label = np.asarray(self._label, dtype=np.int8)
+            return (np.asarray(ret_img), np.asarray(ret_label, dtype=np.int8))
 
     def img_all_data(self):
         if self._status:
@@ -89,7 +89,7 @@ class Dataset(object):
             if self._label[i] is not list:
                 self._label[i] = [int(j)
                                   for j in self.lines[i].strip().split()[1:]]
-        return np.asarray(self._label)
+        return np.asarray(self._label, dtype=np.int8)
 
 
 def import_train(data_root, img_tr):
